@@ -1,23 +1,82 @@
 /* =========================================================
-   カード共通
+   Web フォント
+   ========================================================= */
+
+body {
+    font-family: 'Inter', 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: linear-gradient(135deg, #f0f4f8 0%, #e8eef6 30%, #f5f0ff 70%, #f0f4f8 100%);
+    background-attachment: fixed;
+}
+
+/* =========================================================
+   ヘッダー
+   ========================================================= */
+
+.header-bar {
+    background: linear-gradient(135deg, #1e293b 0%, #1e40af 50%, #7c3aed 100%);
+}
+
+.header-decoration {
+    position: absolute;
+    right: -20px;
+    top: -20px;
+    width: 180px;
+    height: 180px;
+    opacity: 1;
+    pointer-events: none;
+}
+
+/* =========================================================
+   カード共通（グラスモーフィズム）
    ========================================================= */
 
 .card {
-    background-color: #ffffff;
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-radius: 0.75rem;
-    border: 1px solid #e5e7eb;
+    border: 1px solid rgba(255, 255, 255, 0.6);
     border-top: 3px solid #d1d5db;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
-    transition: box-shadow 0.2s ease;
+    box-shadow:
+        0 1px 3px rgba(0, 0, 0, 0.06),
+        0 1px 2px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .card:hover {
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 4px rgba(0, 0, 0, 0.04);
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.08),
+        0 4px 8px rgba(0, 0, 0, 0.04),
+        inset 0 1px 0 rgba(255, 255, 255, 0.5);
+    transform: translateY(-2px);
 }
 
 .card-blue { border-top-color: #3b82f6; }
 .card-green { border-top-color: #10b981; }
 .card-indigo { border-top-color: #6366f1; }
+
+/* =========================================================
+   パネルアニメーション
+   ========================================================= */
+
+.panel-animated {
+    transition: max-height 0.5s ease, opacity 0.4s ease, transform 0.4s ease;
+    overflow: hidden;
+    opacity: 1;
+    transform: translateY(0);
+    max-height: 2000px;
+}
+
+.panel-hidden {
+    max-height: 0 !important;
+    opacity: 0 !important;
+    transform: translateY(-10px) !important;
+    margin-bottom: 0 !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+    pointer-events: none;
+}
 
 /* =========================================================
    プログレスバー
@@ -46,11 +105,54 @@
 }
 
 /* =========================================================
-   アクションボタン
+   アクションボタン（マイクロインタラクション）
    ========================================================= */
 
+.action-btn {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.25s ease;
+}
+
+.action-btn:not(:disabled)::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2) 0%, transparent 50%);
+    opacity: 0;
+    transition: opacity 0.25s ease;
+}
+
+.action-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn:not(:disabled):hover::before {
+    opacity: 1;
+}
+
 .action-btn:not(:disabled):active {
-    transform: scale(0.97);
+    transform: translateY(0) scale(0.97);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+}
+
+.action-btn-sm {
+    transition: all 0.2s ease;
+}
+
+.action-btn-sm:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+}
+
+.action-btn-sm:active {
+    transform: translateY(0) scale(0.97);
 }
 
 /* =========================================================
@@ -175,17 +277,23 @@
 }
 
 /* =========================================================
-   凡例
+   凡例（ピル型）
    ========================================================= */
 
 .shift-legend {
     display: inline-flex;
     align-items: center;
-    padding: 2px 8px;
-    border-radius: 4px;
+    padding: 2px 10px;
+    border-radius: 9999px;
     border: 1px solid #e5e7eb;
     box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
     font-weight: 500;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.shift-legend:hover {
+    transform: scale(1.08);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
 }
 
 /* =========================================================
@@ -193,7 +301,7 @@
    ========================================================= */
 
 #dropZone {
-    transition: all 0.2s ease;
+    transition: all 0.3s ease;
 }
 
 #dropZone:hover {
@@ -208,6 +316,15 @@
     background-color: #eff6ff;
     transform: translateY(-2px);
     box-shadow: 0 6px 16px rgba(59, 130, 246, 0.15);
+}
+
+#dropZone.drag-over #dropIcon {
+    animation: bounce-icon 0.6s ease infinite alternate;
+}
+
+@keyframes bounce-icon {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-6px); }
 }
 
 /* =========================================================
@@ -237,6 +354,38 @@
     background: linear-gradient(180deg, #374151, #4b5563) !important;
     font-size: 10px;
     color: #d1d5db;
+}
+
+/* =========================================================
+   統計バッジ
+   ========================================================= */
+
+.stat-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    padding: 0 4px;
+    border-radius: 9999px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 18px;
+}
+
+.stat-badge-danger {
+    background-color: #fee2e2;
+    color: #dc2626;
+    box-shadow: 0 0 0 1px rgba(220, 38, 38, 0.2);
+}
+
+.stat-badge-warning {
+    background-color: #fef3c7;
+    color: #d97706;
+    box-shadow: 0 0 0 1px rgba(217, 119, 6, 0.2);
+}
+
+.stat-badge-ok {
+    color: #6b7280;
 }
 
 /* =========================================================

@@ -26,6 +26,29 @@ const warningsPanel = document.getElementById("warningsPanel");
 const warningsList = document.getElementById("warningsList");
 const tablePanel = document.getElementById("tablePanel");
 const scheduleTable = document.getElementById("scheduleTable");
+const targetMonth = document.getElementById("targetMonth");
+
+// =========================================================
+// 年月ピッカー初期化
+// =========================================================
+
+// デフォルトで来月をセット
+{
+    const now = new Date();
+    const next = new Date(now.getFullYear(), now.getMonth() + 1, 1);
+    const yyyy = next.getFullYear();
+    const mm = String(next.getMonth() + 1).padStart(2, "0");
+    targetMonth.value = `${yyyy}-${mm}`;
+}
+
+// 年月変更時にテーブルを再描画
+targetMonth.addEventListener("change", () => {
+    if (uploadedData) {
+        const sched = generatedSchedule || uploadedData.schedule;
+        const orig = generatedSchedule ? originalSchedule : null;
+        renderTable(uploadedData.staff_ids, uploadedData.dates, sched, orig);
+    }
+});
 
 // =========================================================
 // プリセット機能
@@ -417,10 +440,13 @@ function renderTable(staffIds, dates, schedule, original = null) {
             if (["公", "希", "休", "有"].includes(shift)) offCount++;
         }
 
-        // 統計列
-        html += `<td class="stats-col">${nightCount}</td>`;
+        // 統計列（バッジ表示）
+        const nightBadge = getStatBadge(nightCount, settings.max_night_shifts, "night");
+        const offBadge = getStatBadge(offCount, settings.days_off, "off");
+
+        html += `<td class="stats-col">${nightBadge}</td>`;
         html += `<td class="stats-col">${dayCount}</td>`;
-        html += `<td class="stats-col">${offCount}</td>`;
+        html += `<td class="stats-col">${offBadge}</td>`;
         html += "</tr>";
     }
 
@@ -454,25 +480,80 @@ function renderTable(staffIds, dates, schedule, original = null) {
     html += "</tbody>";
 
     scheduleTable.innerHTML = html;
-    tablePanel.classList.remove("hidden");
+    showPanel(tablePanel);
 }
 
 function getCellClass(shift) {
     return SHIFT_CLASS_MAP[shift] || "";
 }
 
-function getDayClass(date) {
-    // 日付だけでは曜日がわからないため、デフォルトは空
-    // 将来的に年月情報があれば曜日判定可能
+function getDayClass(dateStr) {
+    const monthVal = targetMonth.value; // "YYYY-MM"
+    if (!monthVal) return "";
+
+    const [yearStr, monthStr] = monthVal.split("-");
+    const year = parseInt(yearStr);
+    const month = parseInt(monthStr); // 1-based
+
+    // dateStr is like "1", "2", ... "31"
+    const day = parseInt(dateStr);
+    if (isNaN(day)) return "";
+
+    const d = new Date(year, month - 1, day);
+    const dow = d.getDay(); // 0=Sun, 6=Sat
+
+    if (dow === 0) return "sunday";
+    if (dow === 6) return "saturday";
     return "";
 }
 
 // =========================================================
-// UI ユーティリティ
+// 統計バッジ
 // =========================================================
 
+function getStatBadge(value, target, type) {
+    if (type === "night") {
+        // 夜勤: 上限に達したら赤バッジ
+        if (value >= target && target > 0) {
+            return `<span class="stat-badge stat-badge-danger">${value}</span>`;
+        }
+        if (value >= target - 1 && target > 0) {
+            return `<span class="stat-badge stat-badge-warning">${value}</span>`;
+        }
+        return `<span class="stat-badge stat-badge-ok">${value}</span>`;
+    }
+    if (type === "off") {
+        // 公休: 目標と2以上乖離でハイライト
+        const diff = Math.abs(value - target);
+        if (diff >= 2) {
+            return `<span class="stat-badge stat-badge-danger">${value}</span>`;
+        }
+        if (diff >= 1) {
+            return `<span class="stat-badge stat-badge-warning">${value}</span>`;
+        }
+        return `<span class="stat-badge stat-badge-ok">${value}</span>`;
+    }
+    return `${value}`;
+}
+
+// =========================================================
+// UI ユーティリティ（スムーズアニメーション）
+// =========================================================
+
+function showPanel(el) {
+    el.classList.remove("panel-hidden");
+}
+
+function hidePanel(el) {
+    el.classList.add("panel-hidden");
+}
+
 function showLoading(show) {
-    loading.classList.toggle("hidden", !show);
+    if (show) {
+        showPanel(loading);
+    } else {
+        hidePanel(loading);
+    }
     generateBtn.disabled = show || !uploadedData;
     downloadBtn.disabled = show || !generatedSchedule;
 }
@@ -481,12 +562,13 @@ function showWarnings(warnings) {
     warningsList.innerHTML = warnings
         .map(w => `<li>${escapeHtml(w)}</li>`)
         .join("");
-    warningsPanel.classList.remove("hidden");
+    showPanel(warningsPanel);
 }
 
 function hideWarnings() {
-    warningsPanel.classList.add("hidden");
-    warningsList.innerHTML = "";
+    hidePanel(warningsPanel);
+    // Clear after transition ends
+    setTimeout(() => { warningsList.innerHTML = ""; }, 500);
 }
 
 function escapeHtml(text) {
