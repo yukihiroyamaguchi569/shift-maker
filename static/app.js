@@ -20,13 +20,137 @@ const fileInfo = document.getElementById("fileInfo");
 const fileName = document.getElementById("fileName");
 const staffCount = document.getElementById("staffCount");
 const generateBtn = document.getElementById("generateBtn");
-const regenerateBtn = document.getElementById("regenerateBtn");
 const downloadBtn = document.getElementById("downloadBtn");
 const loading = document.getElementById("loading");
 const warningsPanel = document.getElementById("warningsPanel");
 const warningsList = document.getElementById("warningsList");
 const tablePanel = document.getElementById("tablePanel");
 const scheduleTable = document.getElementById("scheduleTable");
+
+// =========================================================
+// プリセット機能
+// =========================================================
+
+const SETTING_KEYS = ["dayLeaderCount", "nightLeaderCount", "nightEligibleCount", "requiredPerDay", "maxNightShifts", "daysOff"];
+
+const DEFAULT_PRESETS = {
+    "デフォルト": {
+        dayLeaderCount: 10,
+        nightLeaderCount: 8,
+        nightEligibleCount: 17,
+        requiredPerDay: 5,
+        maxNightShifts: 5,
+        daysOff: 9,
+    }
+};
+
+const presetSelect = document.getElementById("presetSelect");
+const presetSaveBtn = document.getElementById("presetSaveBtn");
+const presetDeleteBtn = document.getElementById("presetDeleteBtn");
+
+function loadPresets() {
+    const custom = JSON.parse(localStorage.getItem("shiftPresets") || "{}");
+    const all = { ...DEFAULT_PRESETS, ...custom };
+    const currentValue = presetSelect.value;
+
+    presetSelect.innerHTML = "";
+    for (const name of Object.keys(all)) {
+        const opt = document.createElement("option");
+        opt.value = name;
+        opt.textContent = name;
+        presetSelect.appendChild(opt);
+    }
+    // (カスタム) option for manual edits
+    const customOpt = document.createElement("option");
+    customOpt.value = "__custom__";
+    customOpt.textContent = "(カスタム)";
+    customOpt.hidden = true;
+    presetSelect.appendChild(customOpt);
+
+    // Restore selection if it still exists, otherwise default
+    if (all[currentValue]) {
+        presetSelect.value = currentValue;
+    } else {
+        presetSelect.value = "デフォルト";
+    }
+}
+
+function applyPreset(name) {
+    const custom = JSON.parse(localStorage.getItem("shiftPresets") || "{}");
+    const all = { ...DEFAULT_PRESETS, ...custom };
+    const preset = all[name];
+    if (!preset) return;
+
+    for (const key of SETTING_KEYS) {
+        const el = document.getElementById(key);
+        if (el && preset[key] !== undefined) {
+            el.value = preset[key];
+        }
+    }
+}
+
+function savePreset() {
+    const name = prompt("プリセット名を入力してください:");
+    if (!name || !name.trim()) return;
+    const trimmed = name.trim();
+
+    if (trimmed === "__custom__") {
+        alert("この名前は使用できません。");
+        return;
+    }
+
+    const values = {};
+    for (const key of SETTING_KEYS) {
+        values[key] = parseInt(document.getElementById(key).value) || 0;
+    }
+
+    const custom = JSON.parse(localStorage.getItem("shiftPresets") || "{}");
+    custom[trimmed] = values;
+    localStorage.setItem("shiftPresets", JSON.stringify(custom));
+
+    loadPresets();
+    presetSelect.value = trimmed;
+}
+
+function deletePreset() {
+    const name = presetSelect.value;
+    if (name === "__custom__") return;
+
+    if (DEFAULT_PRESETS[name]) {
+        alert("固定プリセットは削除できません。");
+        return;
+    }
+
+    if (!confirm(`プリセット「${name}」を削除しますか？`)) return;
+
+    const custom = JSON.parse(localStorage.getItem("shiftPresets") || "{}");
+    delete custom[name];
+    localStorage.setItem("shiftPresets", JSON.stringify(custom));
+
+    loadPresets();
+    presetSelect.value = "デフォルト";
+    applyPreset("デフォルト");
+}
+
+presetSelect.addEventListener("change", () => {
+    const name = presetSelect.value;
+    if (name !== "__custom__") {
+        applyPreset(name);
+    }
+});
+
+presetSaveBtn.addEventListener("click", savePreset);
+presetDeleteBtn.addEventListener("click", deletePreset);
+
+// 設定値の手動変更を検知して「(カスタム)」に切り替え
+for (const key of SETTING_KEYS) {
+    document.getElementById(key).addEventListener("input", () => {
+        presetSelect.value = "__custom__";
+    });
+}
+
+// 初期化
+loadPresets();
 
 // =========================================================
 // シフト種別 → CSSクラス対応表
@@ -108,9 +232,9 @@ async function handleFileUpload(file) {
         staffCount.textContent = `（${uploadedData.staff_ids.length}名 × ${uploadedData.dates.length}日）`;
         fileInfo.classList.remove("hidden");
 
-        // ボタン有効化
+        // ボタン有効化・ラベルリセット
         generateBtn.disabled = false;
-        regenerateBtn.disabled = true;
+        generateBtn.textContent = "シフト作成";
         downloadBtn.disabled = true;
 
         // テーブル表示（元データ）
@@ -129,7 +253,6 @@ async function handleFileUpload(file) {
 // =========================================================
 
 generateBtn.addEventListener("click", () => generateShift());
-regenerateBtn.addEventListener("click", () => generateShift());
 
 async function generateShift() {
     if (!uploadedData) return;
@@ -158,8 +281,8 @@ async function generateShift() {
         const result = await res.json();
         generatedSchedule = result.schedule;
 
-        // ボタン有効化
-        regenerateBtn.disabled = false;
+        // ボタン有効化・ラベルを「再作成」に変更
+        generateBtn.textContent = "再作成";
         downloadBtn.disabled = false;
 
         // テーブル表示
@@ -231,12 +354,12 @@ downloadBtn.addEventListener("click", async () => {
 
 function getSettings() {
     return {
-        day_leader_count: parseInt(document.getElementById("dayLeaderCount").value) || 5,
-        night_leader_count: parseInt(document.getElementById("nightLeaderCount").value) || 3,
-        night_eligible_count: parseInt(document.getElementById("nightEligibleCount").value) || 15,
-        required_staff_per_day: parseInt(document.getElementById("requiredPerDay").value) || 7,
-        max_night_shifts: parseInt(document.getElementById("maxNightShifts").value) || 4,
-        days_off: parseInt(document.getElementById("daysOff").value) || 8,
+        day_leader_count: parseInt(document.getElementById("dayLeaderCount").value) || 10,
+        night_leader_count: parseInt(document.getElementById("nightLeaderCount").value) || 8,
+        night_eligible_count: parseInt(document.getElementById("nightEligibleCount").value) || 17,
+        required_staff_per_day: parseInt(document.getElementById("requiredPerDay").value) || 5,
+        max_night_shifts: parseInt(document.getElementById("maxNightShifts").value) || 5,
+        days_off: parseInt(document.getElementById("daysOff").value) || 9,
     };
 }
 
@@ -351,7 +474,6 @@ function getDayClass(date) {
 function showLoading(show) {
     loading.classList.toggle("hidden", !show);
     generateBtn.disabled = show || !uploadedData;
-    regenerateBtn.disabled = show || !generatedSchedule;
     downloadBtn.disabled = show || !generatedSchedule;
 }
 
