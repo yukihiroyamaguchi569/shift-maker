@@ -11,16 +11,22 @@
     <div class="max-w-7xl mx-auto px-4 py-6">
 
         <!-- ヘッダー -->
-        <div class="mb-6">
-            <h1 class="text-2xl font-bold text-gray-800">病棟勤務表 自動作成システム</h1>
-            <p class="text-sm text-gray-500 mt-1">エクセルファイルをアップロードして、シフトを自動生成します</p>
+        <div class="mb-6 bg-gradient-to-r from-slate-800 to-blue-700 rounded-xl px-6 py-5 shadow-lg">
+            <h1 class="text-2xl font-bold text-white tracking-wide">病棟勤務表 自動作成システム</h1>
+            <p class="text-sm text-blue-200 mt-1">エクセルファイルをアップロードして、シフトを自動生成します</p>
         </div>
 
         <div class="flex gap-5 mb-5">
         <!-- 設定パネル -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 w-80 flex-shrink-0">
+        <div class="card card-blue p-5 w-80 flex-shrink-0">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-base font-semibold text-gray-700">設定</h2>
+                <h2 class="text-base font-semibold text-gray-700 flex items-center gap-1.5">
+                    <svg class="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                    </svg>
+                    設定
+                </h2>
                 <div class="flex items-center gap-1.5">
                     <select id="presetSelect"
                         class="px-2 py-1 border border-gray-300 rounded text-xs focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
@@ -87,8 +93,13 @@
         </div>
 
         <!-- ファイルアップロード -->
-        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-5 flex-1">
-            <h2 class="text-base font-semibold text-gray-700 mb-3">ファイルアップロード</h2>
+        <div class="card card-green p-5 flex-1">
+            <h2 class="text-base font-semibold text-gray-700 mb-3 flex items-center gap-1.5">
+                <svg class="h-4 w-4 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                </svg>
+                ファイルアップロード
+            </h2>
             <div id="dropZone"
                 class="border-2 border-dashed border-gray-300 rounded-lg p-4 text-center cursor-pointer hover:border-blue-400 hover:bg-blue-50 transition-colors">
                 <svg class="mx-auto h-8 w-8 text-gray-400 mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -108,11 +119,17 @@
             </div>
             <div class="flex gap-3 mt-3">
                 <button id="generateBtn" disabled
-                    class="px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-sm">
+                    class="action-btn px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md disabled:shadow-none flex items-center gap-1.5">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                    </svg>
                     シフト作成
                 </button>
                 <button id="downloadBtn" disabled
-                    class="px-5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors shadow-sm">
+                    class="action-btn px-5 py-2.5 bg-emerald-600 text-white text-sm font-medium rounded-lg hover:bg-emerald-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-all shadow-sm hover:shadow-md disabled:shadow-none flex items-center gap-1.5">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
                     ダウンロード
                 </button>
             </div>
@@ -121,13 +138,14 @@
 
         <!-- ローディング -->
         <div id="loading" class="hidden mb-5">
-            <div class="flex items-center gap-3 text-sm text-gray-600">
+            <div class="flex items-center gap-3 text-sm text-gray-600 mb-2">
                 <svg class="animate-spin h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24">
                     <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
                     <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"/>
                 </svg>
                 <span>シフトを生成中...</span>
             </div>
+            <div class="progress-bar"><div class="progress-bar-inner"></div></div>
         </div>
 
         <!-- 警告メッセージ -->
@@ -148,9 +166,14 @@
         </div>
 
         <!-- 勤務表テーブル -->
-        <div id="tablePanel" class="hidden bg-white rounded-lg shadow-sm border border-gray-200 p-5">
+        <div id="tablePanel" class="hidden card card-indigo p-5">
             <div class="flex items-center justify-between mb-4">
-                <h2 class="text-base font-semibold text-gray-700">勤務表</h2>
+                <h2 class="text-base font-semibold text-gray-700 flex items-center gap-1.5">
+                    <svg class="h-4 w-4 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M3 14h18m-9-4v8m-7 0h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/>
+                    </svg>
+                    勤務表
+                </h2>
                 <div id="legend" class="flex flex-wrap gap-2 text-xs">
                     <span class="shift-legend shift-day">日=日勤</span>
                     <span class="shift-legend shift-night">夜=夜勤</span>
@@ -167,11 +190,11 @@
         </div>
 
         <!-- フッター -->
-        <div class="mt-8 text-center text-xs text-gray-400">
+        <div class="mt-8 text-center text-xs text-gray-400 border-t border-gray-200 pt-4">
             <p>病棟勤務表 自動作成システム v1.0</p>
         </div>
     </div>
 
-    <script src="/static/app.js?v=4"></script>
+    <script src="/static/app.js?v=5"></script>
 </body>
 </html>
