@@ -6,7 +6,7 @@ import os
 from typing import Any, Dict, List
 
 from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import HTMLResponse, Response
+from fastapi.responses import FileResponse, HTMLResponse, Response
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -44,11 +44,10 @@ class DownloadRequest(BaseModel):
 # =========================================================
 
 
-@app.get("/", response_class=HTMLResponse)
+@app.get("/")
 async def root():
     """トップページ"""
-    with open(os.path.join(BASE_DIR, "static", "index.html"), "r", encoding="utf-8") as f:
-        return HTMLResponse(content=f.read())
+    return FileResponse(os.path.join(BASE_DIR, "static", "index.html"))
 
 
 @app.post("/api/upload")
