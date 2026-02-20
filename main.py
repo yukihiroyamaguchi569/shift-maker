@@ -13,10 +13,12 @@ from pydantic import BaseModel
 from excel_handler import read_excel, write_excel
 from solver import generate_shift
 
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 app = FastAPI(title="病棟勤務表 自動作成システム")
 
 # 静的ファイルの配信
-app.mount("/static", StaticFiles(directory="static"), name="static")
+app.mount("/static", StaticFiles(directory=os.path.join(BASE_DIR, "static")), name="static")
 
 
 # =========================================================
@@ -45,7 +47,7 @@ class DownloadRequest(BaseModel):
 @app.get("/", response_class=HTMLResponse)
 async def root():
     """トップページ"""
-    with open("static/index.html", "r", encoding="utf-8") as f:
+    with open(os.path.join(BASE_DIR, "static", "index.html"), "r", encoding="utf-8") as f:
         return HTMLResponse(content=f.read())
 
 
